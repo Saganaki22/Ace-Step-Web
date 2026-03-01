@@ -96,12 +96,13 @@ let state = {
 
 const elements = {};
 
-function init() {
+async function init() {
   cacheElements();
   populateLanguages();
   setupEventListeners();
   loadSettings();
-  loadGenerations();
+  await initDB();
+  await loadGenerations();
   updateUI();
 }
 
@@ -538,9 +539,11 @@ async function generateMusic() {
       const caption = isSample ? elements.sampleQuery.value : elements.caption.value;
       const lyrics = isSample ? '' : elements.lyrics.value;
       
-      saveGeneration({
+      const audioBlob = await fetch(audioData).then(r => r.blob());
+      
+      await saveGeneration({
         id: Date.now(),
-        audioData,
+        audioBlob,
         caption,
         lyrics,
         timestamp: new Date().toISOString()
@@ -590,60 +593,179 @@ function parseAudioResponse(result) {
   return null;
 }
 
-function loadGenerations() {
+const DB_NAME = 'acestep_db';
+const STORE_NAME = 'generations';
+let db = null;
+
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
+      if (!database.objectStoreNames.contains(STORE_NAME)) {
+        database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+async function loadGenerations() {
   try {
-    const saved = localStorage.getItem('acestep_generations');
-    const generations = saved ? JSON.parse(saved) : [];
-    renderGenerations(generations);
+    if (!db) await initDB();
+    
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const generations = request.result.sort((a, b) => b.id - a.id);
+        renderGenerations(generations);
+        resolve(generations);
+      };
+      request.onerror = () => reject(request.error);
+    });
   } catch (e) {
     console.error('Error loading generations:', e);
     renderGenerations([]);
   }
 }
 
-function saveGeneration(generation) {
+async function saveGeneration(generation) {
   try {
-    const saved = localStorage.getItem('acestep_generations');
-    const generations = saved ? JSON.parse(saved) : [];
-    generations.unshift(generation);
+    if (!db) await initDB();
     
-    if (generations.length > 20) {
-      generations.length = 20;
-    }
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
     
-    try {
-      localStorage.setItem('acestep_generations', JSON.stringify(generations));
-      renderGenerations(generations);
-    } catch (quotaError) {
-      while (generations.length > 5) {
-        generations.pop();
-        try {
-          localStorage.setItem('acestep_generations', JSON.stringify(generations));
-          renderGenerations(generations);
-          toast('Storage full - older generations removed', 'warning');
-          return;
-        } catch (e) {
-          continue;
+    const countRequest = store.count();
+    
+    return new Promise((resolve, reject) => {
+      countRequest.onsuccess = async () => {
+        const count = countRequest.result;
+        
+        if (count >= 20) {
+          const allRequest = store.getAll();
+          allRequest.onsuccess = async () => {
+            const all = allRequest.result.sort((a, b) => a.id - b.id);
+            const toDelete = all.slice(0, count - 19);
+            
+            for (const item of toDelete) {
+              await new Promise((res, rej) => {
+                const delTx = db.transaction([STORE_NAME], 'readwrite');
+                const delStore = delTx.objectStore(STORE_NAME);
+                const delReq = delStore.delete(item.id);
+                delReq.onsuccess = res;
+                delReq.onerror = rej;
+              });
+            }
+            
+            const addTx = db.transaction([STORE_NAME], 'readwrite');
+            const addStore = addTx.objectStore(STORE_NAME);
+            const addReq = addStore.add(generation);
+            addReq.onsuccess = () => {
+              loadGenerations();
+              resolve();
+            };
+            addReq.onerror = () => reject(addReq.error);
+          };
+        } else {
+          const addReq = store.add(generation);
+          addReq.onsuccess = () => {
+            loadGenerations();
+            resolve();
+          };
+          addReq.onerror = () => reject(addReq.error);
         }
-      }
-      toast('Storage full - please clear some generations', 'error');
-    }
+      };
+    });
   } catch (e) {
     console.error('Error saving generation:', e);
     toast('Failed to save generation', 'error');
   }
 }
 
-function deleteGeneration(id) {
+async function deleteGeneration(id) {
   try {
-    const saved = localStorage.getItem('acestep_generations');
-    const generations = saved ? JSON.parse(saved) : [];
-    const filtered = generations.filter(g => g.id !== id);
-    localStorage.setItem('acestep_generations', JSON.stringify(filtered));
-    renderGenerations(filtered);
-    toast('Generation deleted', 'success');
+    if (!db) await initDB();
+    
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.delete(id);
+      request.onsuccess = () => {
+        loadGenerations();
+        toast('Generation deleted', 'success');
+        resolve();
+      };
+      request.onerror = () => reject(request.error);
+    });
   } catch (e) {
     console.error('Error deleting generation:', e);
+  }
+}
+
+async function downloadGeneration(id) {
+  try {
+    if (!db) await initDB();
+    
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.get(id);
+      request.onsuccess = () => {
+        const generation = request.result;
+        if (generation && generation.audioBlob) {
+          const url = URL.createObjectURL(generation.audioBlob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `acestep-${id}.wav`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast('Download started', 'success');
+          resolve();
+        } else {
+          toast('Audio not found', 'error');
+          reject();
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error('Error downloading generation:', e);
+    toast('Download failed', 'error');
+  }
+}
+
+async function clearAllGenerationsDB() {
+  try {
+    if (!db) await initDB();
+    
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    return new Promise((resolve, reject) => {
+      const request = store.clear();
+      request.onsuccess = () => {
+        renderGenerations([]);
+        toast('All generations cleared', 'success');
+        resolve();
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } catch (e) {
+    console.error('Error clearing generations:', e);
   }
 }
 
@@ -651,11 +773,26 @@ function clearAllGenerations() {
   elements.clearAllModal.classList.add('active');
 }
 
-function confirmClearAll() {
-  localStorage.removeItem('acestep_generations');
-  renderGenerations([]);
-  elements.clearAllModal.classList.remove('active');
-  toast('All generations cleared', 'success');
+async function confirmClearAll() {
+  try {
+    if (!db) await initDB();
+    
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    await new Promise((resolve, reject) => {
+      const request = store.clear();
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+    
+    renderGenerations([]);
+    elements.clearAllModal.classList.remove('active');
+    toast('All generations cleared', 'success');
+  } catch (e) {
+    console.error('Error clearing generations:', e);
+    toast('Failed to clear generations', 'error');
+  }
 }
 
 function cancelClearAll() {
@@ -682,6 +819,11 @@ function renderGenerations(generations) {
       <div class="generation-header">
         <span class="generation-time">${formatTime(g.timestamp)}</span>
         <div class="generation-actions">
+          <button class="btn-download" onclick="downloadGeneration(${g.id})" title="Download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+            </svg>
+          </button>
           <button class="btn-delete" onclick="deleteGeneration(${g.id})" title="Delete">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -689,8 +831,8 @@ function renderGenerations(generations) {
           </button>
         </div>
       </div>
-      <div class="generation-audio">
-        <audio controls src="${g.audioData}"></audio>
+      <div class="generation-audio" id="audio-container-${g.id}">
+        <audio controls></audio>
       </div>
       <div class="generation-info" onclick="toggleExpand(${g.id})">
         <div class="generation-caption" id="caption-${g.id}">${escapeHtml(g.caption || 'No caption')}</div>
@@ -699,6 +841,16 @@ function renderGenerations(generations) {
       </div>
     </div>
   `).join('');
+
+  generations.forEach(g => {
+    if (g.audioBlob) {
+      const audioUrl = URL.createObjectURL(g.audioBlob);
+      const audioEl = document.querySelector(`#audio-container-${g.id} audio`);
+      if (audioEl) {
+        audioEl.src = audioUrl;
+      }
+    }
+  });
 }
 
 function toggleExpand(id) {
@@ -764,8 +916,8 @@ function setupShowMore() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  init();
+document.addEventListener('DOMContentLoaded', async () => {
+  await init();
   setupShowMore();
 });
 
