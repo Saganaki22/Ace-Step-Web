@@ -777,7 +777,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   gap: 0.5rem;
 }
 
-.btn-delete {
+.btn-download, .btn-delete {
   width: 28px;
   height: 28px;
   display: flex;
@@ -791,13 +791,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transition: all var(--transition-fast);
 }
 
+.btn-download:hover {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--success);
+  color: var(--success);
+}
+
 .btn-delete:hover {
   background: rgba(239, 68, 68, 0.1);
   border-color: var(--error);
   color: var(--error);
 }
 
-.btn-delete svg {
+.btn-download svg, .btn-delete svg {
   width: 14px;
   height: 14px;
 }
