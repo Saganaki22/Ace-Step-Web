@@ -607,12 +607,27 @@ function saveGeneration(generation) {
     const generations = saved ? JSON.parse(saved) : [];
     generations.unshift(generation);
     
-    if (generations.length > 50) {
-      generations.pop();
+    if (generations.length > 20) {
+      generations.length = 20;
     }
     
-    localStorage.setItem('acestep_generations', JSON.stringify(generations));
-    renderGenerations(generations);
+    try {
+      localStorage.setItem('acestep_generations', JSON.stringify(generations));
+      renderGenerations(generations);
+    } catch (quotaError) {
+      while (generations.length > 5) {
+        generations.pop();
+        try {
+          localStorage.setItem('acestep_generations', JSON.stringify(generations));
+          renderGenerations(generations);
+          toast('Storage full - older generations removed', 'warning');
+          return;
+        } catch (e) {
+          continue;
+        }
+      }
+      toast('Storage full - please clear some generations', 'error');
+    }
   } catch (e) {
     console.error('Error saving generation:', e);
     toast('Failed to save generation', 'error');
