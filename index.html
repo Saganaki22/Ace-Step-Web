@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ACE-Step-Web | AI Music Generator</title>
+  <meta name="description" content="Generate music with AI using ACE-Step. Create songs from text descriptions, cover/remix tracks, and more. Free, modern web interface.">
+  <meta name="keywords" content="AI music, music generator, ACE-Step, text to music, AI song generator, music production">
+  <meta name="author" content="ACE-Step-Web">
+  <meta name="robots" content="index, follow">
+  
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+  <link rel="canonical" href="https://drbaph.is-a.dev/Ace-Step-Web/">
+  
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://drbaph.is-a.dev/Ace-Step-Web/">
+  <meta property="og:title" content="ACE-Step-Web | AI Music Generator">
+  <meta property="og:description" content="Generate music with AI using ACE-Step. Create songs from text descriptions, cover/remix tracks, and more.">
+  <meta property="og:image" content="https://drbaph.is-a.dev/Ace-Step-Web/public/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="ACE-Step-Web">
+  <meta property="og:locale" content="en_US">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://drbaph.is-a.dev/Ace-Step-Web/">
+  <meta name="twitter:title" content="ACE-Step-Web | AI Music Generator">
+  <meta name="twitter:description" content="Generate music with AI using ACE-Step. Create songs from text descriptions, cover/remix tracks, and more.">
+  <meta name="twitter:image" content="https://drbaph.is-a.dev/Ace-Step-Web/public/og-image.jpg">
+  
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="msapplication-TileColor" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ACE-Step-Web">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18V5l12-2v13" stroke="url(#gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6" cy="18" r="3" fill="url(#gradient)"/>
+          <circle cx="18" cy="16" r="3" fill="url(#gradient)"/>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#a855f7"/>
+              <stop offset="100%" style="stop-color:#6366f1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">ACE-Step-Web</span>
+      </div>
+      <div class="header-actions">
+        <a href="https://github.com/saganaki22/Ace-Step-Web" target="_blank" class="btn-icon" title="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+        <button id="settingsBtn" class="btn-icon" title="API Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="sidebar">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Generation Mode</h2>
+          </div>
+          <div class="panel-content">
+            <div class="mode-toggle">
+              <button class="mode-btn active" data-mode="sample">
+                <span class="mode-icon">✨</span>
+                <span>Sample Mode</span>
+                <small>AI generates everything</small>
+              </button>
+              <button class="mode-btn" data-mode="manual">
+                <span class="mode-icon">✏️</span>
+                <span>Manual Mode</span>
+                <small>Full control</small>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Task Type</h2>
+          </div>
+          <div class="panel-content">
+            <div class="task-types">
+              <label class="task-option">
+                <input type="radio" name="taskType" value="text2music" checked>
+                <span class="task-card">
+                  <span class="task-icon">🎵</span>
+                  <span class="task-label">Text to Music</span>
+                </span>
+              </label>
+              <label class="task-option">
+                <input type="radio" name="taskType" value="cover">
+                <span class="task-card">
+                  <span class="task-icon">🔄</span>
+                  <span class="task-label">Cover / Remix</span>
+                </span>
+              </label>
+              <label class="task-option">
+                <input type="radio" name="taskType" value="repaint">
+                <span class="task-card">
+                  <span class="task-icon">🎨</span>
+                  <span class="task-label">Repaint</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Examples</h2>
+          </div>
+          <div class="panel-content">
+            <div class="examples-list" id="examplesList">
+              <button class="example-btn" data-example="funk">🎸 Funk Rock</button>
+              <button class="example-btn" data-example="hiphop">🎤 Hip Hop</button>
+              <button class="example-btn" data-example="electronic">🎹 Electronic</button>
+              <button class="example-btn" data-example="metal">🤘 Heavy Metal</button>
+              <button class="example-btn" data-example="synthpop">✨ Synthpop</button>
+              <button class="example-btn" data-example="lofi">☕ Lo-Fi</button>
+              <button class="example-btn hidden" data-example="jazz">🎷 Jazz</button>
+              <button class="example-btn hidden" data-example="country">🤠 Country</button>
+              <button class="example-btn hidden" data-example="dubstep">🔊 Dubstep</button>
+              <button class="example-btn hidden" data-example="dnb">🥁 Drum & Bass</button>
+              <button class="example-btn hidden" data-example="phonk">👻 Phonk</button>
+              <button class="example-btn hidden" data-example="postpunk">🖤 Post-Punk</button>
+              <button class="example-btn hidden" data-example="symphonicmetal">🎻 Symphonic Metal</button>
+              <button class="example-btn hidden" data-example="chiptune">🎮 Chiptune</button>
+            </div>
+            <button class="show-more-btn" id="showMoreBtn">Show More</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="tabs">
+          <button class="tab active" data-tab="params">Parameters</button>
+          <button class="tab" data-tab="settings">Advanced</button>
+          <button class="tab" data-tab="output">Output</button>
+        </div>
+
+        <div class="tab-content active" id="params">
+          <div class="form-grid">
+            <div class="form-section sample-mode-fields">
+              <h3>Sample Query</h3>
+              <div class="field full-width">
+                <label>Describe your music <span class="tooltip" data-tooltip="Describe what you want in natural language - AI will generate caption, lyrics & metadata">ⓘ</span></label>
+                <textarea id="sampleQuery" rows="3" placeholder="a funk rock song with groovy bass and punchy drums"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Vocal Language</label>
+                  <select id="vocalLanguage"></select>
+                </div>
+                <div class="field">
+                  <label class="toggle-label">
+                    <span>Instrumental Only</span>
+                    <input type="checkbox" id="isInstrumental">
+                    <span class="toggle"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section manual-mode-fields hidden">
+              <h3>Music Description</h3>
+              <div class="field full-width">
+                <label>Caption <span class="tooltip" data-tooltip="Detailed description of the music style, instruments, mood, tempo, etc.">ⓘ</span></label>
+                <textarea id="caption" rows="4"></textarea>
+              </div>
+              <div class="field full-width">
+                <label>Lyrics <small>(leave empty for instrumental)</small> <span class="tooltip" data-tooltip="Song lyrics with [Verse], [Chorus], [Bridge] section tags">ⓘ</span></label>
+                <textarea id="lyrics" rows="6" placeholder="[Verse 1]&#10;[Chorus]"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Vocal Language</label>
+                  <select id="vocalLanguageManual"></select>
+                </div>
+                <div class="field">
+                  <label class="toggle-label">
+                    <span>Auto-detect BPM/Key</span>
+                    <input type="checkbox" id="autoMetas" checked>
+                    <span class="toggle"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field-row manual-metas hidden">
+                <div class="field">
+                  <label>BPM <span class="tooltip" data-tooltip="Beats per minute - tempo of the song">ⓘ</span></label>
+                  <input type="number" id="bpm" min="0" max="300" value="120">
+                </div>
+                <div class="field">
+                  <label>Key <span class="tooltip" data-tooltip="Musical key (e.g., C major, A minor)">ⓘ</span></label>
+                  <input type="text" id="keyScale" placeholder="C major">
+                </div>
+                <div class="field">
+                  <label>Duration (s) <span class="tooltip" data-tooltip="Length of the generated audio in seconds">ⓘ</span></label>
+                  <input type="number" id="duration" min="-1" max="600" value="30" step="1">
+                </div>
+                <div class="field">
+                  <label>Time Signature <span class="tooltip" data-tooltip="Musical time signature (4, 3, 6, etc.)">ⓘ</span></label>
+                  <input type="text" id="timeSignature" placeholder="4">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section cover-fields hidden">
+              <h3>Cover / Remix Settings</h3>
+              <div class="field full-width">
+                <label>Source Audio <span class="tooltip" data-tooltip="The original song you want to cover or remix">ⓘ</span></label>
+                <div class="file-upload">
+                  <input type="file" id="srcAudio" accept="audio/*">
+                  <div class="file-upload-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <span>Original song to cover/remix</span>
+                  </div>
+                  <div class="file-name hidden"></div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Cover Strength <span class="tooltip" data-tooltip="How much to transform the original (0 = clean cover, 1 = heavy remix)">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="coverStrength" min="0" max="1" step="0.05" value="0">
+                    <span class="slider-value">0.00</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Remix Strength <span class="tooltip" data-tooltip="How much of original audio to preserve (1.0 = keep more original)">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="remixStrength" min="0" max="1" step="0.05" value="1">
+                    <span class="slider-value">1.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section repaint-fields hidden">
+              <h3>Repaint Settings <span class="tooltip section-tooltip" data-tooltip="Regenerate a specific time range within the source audio">ⓘ</span></h3>
+              <div class="field full-width">
+                <label>Source Audio <span class="tooltip" data-tooltip="The audio file containing the section you want to regenerate">ⓘ</span></label>
+                <div class="file-upload">
+                  <input type="file" id="srcAudioRepaint" accept="audio/*">
+                  <div class="file-upload-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <span>Audio to repaint a section of</span>
+                  </div>
+                  <div class="file-name hidden"></div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Start Time (s) <span class="tooltip" data-tooltip="Where the repainted section begins">ⓘ</span></label>
+                  <input type="number" id="repaintStart" min="0" max="600" value="0" step="0.1">
+                </div>
+                <div class="field">
+                  <label>End Time (s) <span class="tooltip" data-tooltip="Where the repainted section ends (0 = until end)">ⓘ</span></label>
+                  <input type="number" id="repaintEnd" min="0" max="600" value="0" step="0.1">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section reference-section">
+              <h3>Reference Audio <small>(optional)</small> <span class="tooltip section-tooltip" data-tooltip="Optional audio to guide the style/timbre of generation">ⓘ</span></h3>
+              <div class="field full-width">
+                <div class="file-upload">
+                  <input type="file" id="referAudio" accept="audio/*">
+                  <div class="file-upload-content">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <span>Style reference audio</span>
+                  </div>
+                  <div class="file-name hidden"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="settings">
+          <div class="form-grid">
+            <div class="form-section">
+              <h3>LM Settings</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Seed <span class="tooltip" data-tooltip="Random seed for reproducibility (-1 = random)">ⓘ</span></label>
+                  <input type="text" id="seed" value="-1" placeholder="-1 for random">
+                </div>
+                <div class="field">
+                  <label>Temperature <span class="tooltip" data-tooltip="Controls randomness. Lower = more deterministic, Higher = more creative">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="temperature" min="0" max="2" step="0.05" value="0.85">
+                    <span class="slider-value">0.85</span>
+                  </div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label class="toggle-label">
+                    <span>Thinking Mode</span>
+                    <input type="checkbox" id="thinking" checked>
+                    <span class="toggle"></span>
+                  </label>
+                  <small>5Hz LM audio code generation</small>
+                </div>
+                <div class="field">
+                  <label class="toggle-label">
+                    <span>CoT Caption</span>
+                    <input type="checkbox" id="useCotCaption" checked>
+                    <span class="toggle"></span>
+                  </label>
+                  <small>LLM rewrites caption via CoT</small>
+                </div>
+                <div class="field">
+                  <label class="toggle-label">
+                    <span>CoT Language</span>
+                    <input type="checkbox" id="useCotLanguage" checked>
+                    <span class="toggle"></span>
+                  </label>
+                  <small>Auto-detect vocal language</small>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>LM CFG Scale <span class="tooltip" data-tooltip="Language model classifier-free guidance scale">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="lmCfgScale" min="1" max="5" step="0.1" value="2">
+                    <span class="slider-value">2.0</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>LM Top-P <span class="tooltip" data-tooltip="Nucleus sampling - keeps top probability mass">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="lmTopP" min="0" max="1" step="0.01" value="0.9">
+                    <span class="slider-value">0.90</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>LM Top-K <span class="tooltip" data-tooltip="Limits to top K tokens (0 = disabled)">ⓘ</span></label>
+                  <input type="number" id="lmTopK" min="0" max="200" value="0">
+                  <small>0 = disabled</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>DiT Settings</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Guidance Scale <span class="tooltip" data-tooltip="Diffusion model guidance - higher = more prompt adherence">ⓘ</span></label>
+                  <div class="slider-container">
+                    <input type="range" id="ditGuidanceScale" min="0" max="20" step="0.5" value="7">
+                    <span class="slider-value">7.0</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Inference Steps <span class="tooltip" data-tooltip="More steps = higher quality but slower (turbo default = 8)">ⓘ</span></label>
+                  <input type="number" id="ditInferenceSteps" min="1" max="200" value="8">
+                  <small>Turbo default = 8</small>
+                </div>
+                <div class="field">
+                  <label>Inference Method <span class="tooltip" data-tooltip="ODE = deterministic, SDE = stochastic">ⓘ</span></label>
+                  <select id="ditInferMethod">
+                    <option value="ode">ODE</option>
+                    <option value="sde">SDE</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="output">
+          <div class="output-header">
+            <h3>Your Generations</h3>
+            <button id="clearAllBtn" class="btn-danger">Clear All</button>
+          </div>
+          <div id="generationsList" class="generations-list">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10,8 16,12 10,16" fill="currentColor"/>
+              </svg>
+              <span>No generations yet</span>
+              <p>Generate some music to see it here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-info">
+        <span id="statusText">Ready</span>
+      </div>
+      <button id="generateBtn" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+        </svg>
+        <span>Generate Music</span>
+      </button>
+    </footer>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>API Settings</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Connection Mode</label>
+          <select id="apiMode">
+            <option value="worker">Worker (Rate Limited)</option>
+            <option value="custom">Custom API Key</option>
+          </select>
+          <small id="apiModeHint">Shared proxy - no key needed</small>
+        </div>
+        <div class="field custom-mode hidden">
+          <label>API Key</label>
+          <input type="password" id="apiKey" placeholder="Your ACE-Step API key">
+          <small>Get your key at <a href="https://acemusic.ai/api-key" target="_blank">acemusic.ai/api-key</a></small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelSettings">Cancel</button>
+        <button class="btn-primary" id="saveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="clearAllModal">
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h2>Clear All Generations?</h2>
+      </div>
+      <div class="modal-body">
+        <p>This will permanently delete all your saved generations. This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelClearAll">Cancel</button>
+        <button class="btn-danger" id="confirmClearAll">Yes, Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

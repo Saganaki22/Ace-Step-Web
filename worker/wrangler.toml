@@ -1,0 +1,8 @@
+name = "acestep-proxy"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Set your API key via dashboard or: wrangler secret put ACESTEP_API_KEY
