@@ -42,12 +42,13 @@ A modern, dark-themed web interface for [ACE-Step](https://acemusic.ai) AI music
 - 🎮 Chiptune
 
 ### Output Tab
-- 💾 Auto-saves generations to browser localStorage (up to 50)
+- 💾 Auto-saves generations to browser localStorage (up to 20)
 - ⏰ Timestamps for each generation
 - 📝 Expandable caption and lyrics
 - 🗑️ Delete individual generations
 - 🧹 Clear All with confirmation modal (red "Yes" button)
 - 🎧 Built-in audio player
+- 🔄 Auto-cleanup when storage quota exceeded
 
 ### Tooltips
 - Hover over ⓘ icons for detailed explanations of each parameter
