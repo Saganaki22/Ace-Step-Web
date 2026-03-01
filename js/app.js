@@ -220,6 +220,21 @@ function setupEventListeners() {
   elements.srcAudio.addEventListener('change', (e) => handleAudioUpload(e, 'src'));
   elements.srcAudioRepaint.addEventListener('change', (e) => handleAudioUpload(e, 'src'));
   elements.referAudio.addEventListener('change', (e) => handleAudioUpload(e, 'refer'));
+  
+  window.clearFileInput = function(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.value = '';
+      const container = input.closest('.file-upload');
+      const fileName = container.querySelector('.file-name');
+      const uploadContent = container.querySelector('.file-upload-content');
+      if (fileName) fileName.classList.add('hidden');
+      if (uploadContent) uploadContent.classList.remove('hidden');
+      
+      if (inputId === 'srcAudio') state.srcAudioData = null;
+      if (inputId === 'referAudio') state.referAudioData = null;
+    }
+  };
 
   elements.settingsBtn.addEventListener('click', () => {
     elements.settingsModal.classList.add('active');
@@ -315,8 +330,12 @@ function handleAudioUpload(event, type) {
     
     const container = event.target.closest('.file-upload');
     const fileName = container.querySelector('.file-name');
-    fileName.textContent = file.name;
-    fileName.classList.remove('hidden');
+    const fileNameText = container.querySelector('.file-name-text');
+    const uploadContent = container.querySelector('.file-upload-content');
+    
+    if (fileNameText) fileNameText.textContent = file.name;
+    if (fileName) fileName.classList.remove('hidden');
+    if (uploadContent) uploadContent.classList.add('hidden');
     
     toast(`Audio file loaded: ${file.name}`, 'success');
   };

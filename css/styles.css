@@ -669,10 +669,50 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .file-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0.75rem 1rem;
   background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.875rem;
+}
+
+.file-name-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-clear {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  margin-left: 0.5rem;
+}
+
+.file-clear:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+}
+
+.file-clear svg {
+  width: 14px;
+  height: 14px;
+}
+
+.file-name.hidden + .file-upload-content {
+  display: flex;
 }
 
 .file-name:not(.hidden) + .file-upload-content {
